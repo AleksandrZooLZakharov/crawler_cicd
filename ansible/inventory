@@ -1,0 +1,5 @@
+[all]
+gitlab_ip ansible_host=35.205.171.40
+mongo_internal_ip ansible_host=10.132.15.216
+mongo_ip ansible_host=35.195.118.78
+rabbitmq_ip ansible_host=35.241.186.93

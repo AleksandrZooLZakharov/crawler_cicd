@@ -1,0 +1,110 @@
+image: python:3.6
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+    - venv/
+
+
+stages:
+  - build
+  - test
+  - review
+  - stage
+  - production
+
+build_job:
+  stage: build
+  before_script:
+    - echo 'Building'
+    - ls -a
+    - apt-get update
+    - apt-get install apt-transport-https software-properties-common -y --no-install-recommends
+    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+    - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
+    - apt-get update
+    - apt-get install docker-ce docker-compose -y --no-install-recommends
+    - docker --version
+    - docker-compose --version
+  script:
+#    - cat .dp.p | docker login -u zoolgle --password-stdin 
+    - docker build --squash --tag zoolgle/ui:latest ./ui
+    - docker login -u zoolgle -p dockerpass 
+    - docker push zoolgle/ui:latest
+
+test_UI_job:
+  stage: test
+  before_script:
+    - python -V # Print out python version for debugging
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - echo 'Testing user interface'
+    - cd ui
+    - pip install -r requirements.txt -r requirements-test.txt
+  script:
+    - python -m unittest discover -s tests/
+    - coverage run -m unittest discover -s tests/
+    - coverage report --include ui/ui.py
+
+test_Crawler_job:
+  stage: test
+  before_script:
+    - python3 -V # Print out python version for debugging
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - echo 'Testing Crawler'
+    - cd crawler
+    - pip3 install -r requirements.txt -r requirements-test.txt
+  script:
+    - python3 -m unittest discover -s tests/ 
+    - coverage run -m unittest discover -s tests/ 
+    - coverage report --include crawler/crawler.py
+
+deploy_to_review_job:
+  stage: review
+  before_script:
+    - echo "Deploy to $CI_ENVIRONMENT_SLUG"
+    - ls -a
+    - apt-get update
+    - apt-get install apt-transport-https software-properties-common -y --no-install-recommends
+    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+    - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
+    - apt-get update
+    - apt-get install docker-compose -y --no-install-recommends
+    - docker-compose --version
+  script:
+    - docker-compose up -d
+  environment:
+    name: dev_branch/$CI_COMMIT_REF_NAME
+    url: http://$CI_ENVIRONMENT_SLUG.example.com
+
+staging:
+  stage: stage
+  when: manual
+  only:
+    - /^\d+\.\d+\.\d+/
+  before_script:
+    - echo 'Deploy to stage'
+  script:
+    - docker-compose up -d
+  environment:
+    name: stage
+    url: https://beta.example.com
+
+production:
+  stage: production
+  when: manual
+  only:
+    - /^\d+\.\d+\.\d+/
+  before_script:
+    - echo 'Deploy to production'
+  script:
+    - docker-compose up -d
+  environment:
+    name: production
+    url: https://example.com

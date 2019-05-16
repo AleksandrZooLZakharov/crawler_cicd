@@ -1,0 +1,19 @@
+---
+# tasks file for rabbit
+- name: install pip
+  apt:
+    name: python-pip
+
+- name: install docker
+  pip:
+    name: docker
+
+- name: Create db container and connect to network
+  docker_container:
+    name: rabbitmq
+    image: "rabbitmq:3-management"
+    state: started
+    restart: yes
+    ports:
+      - "127.0.0.1:1562:1562/tcp"
+    env: {RABBITMQ_DEFAULT_USER: "rabbit", RABBITMQ_DEFAULT_PASS: "rabbit"}

@@ -1,0 +1,11 @@
+---
+- name: Configure RabbitMQ
+  hosts: rabbitmq_ip
+  become: true
+
+  vars:
+    db_host: "{{ mongo_ip }}"
+
+  roles:
+    - rabbit
+

@@ -1,0 +1,11 @@
+---
+# tasks file for crawler_app
+- name: Create Crawler container and connect to network
+  docker_container:
+    name: Crawler
+    image: "zoolgle/crawler:latest"
+    state: started
+    restart: yes
+    ports:
+      - "127.0.0.1:8000:8000/tcp"
+

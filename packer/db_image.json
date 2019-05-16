@@ -1,0 +1,20 @@
+{
+    "builders": [
+        {
+            "type": "googlecompute",
+            "project_id": "docker-235709",
+            "image_name": "mongo-image-{{timestamp}}",
+            "image_family": "mongo-image",
+            "source_image_family": "ubuntu-1604-lts",
+            "zone": "europe-west1-b",
+            "ssh_username": "azakharov77",
+            "machine_type": "f1-micro"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "ansible",
+            "playbook_file": "ansible/packer_db.yml"
+        }
+    ]
+}

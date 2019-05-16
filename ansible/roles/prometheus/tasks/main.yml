@@ -1,0 +1,11 @@
+---
+# tasks file for prometheus
+- name: Create Prometheus container and connect to network
+  docker_container:
+    name: Prometheus
+    image: "prom/prometheus:master"
+    state: started
+    restart: yes
+    ports:
+      - "127.0.0.1:80:80/tcp"
+

@@ -1,0 +1,11 @@
+---
+# tasks file for ui
+- name: Create UI container and connect to network
+  docker_container:
+    name: Crawler_UI
+    image: "zoolgle/ui:latest"
+    state: started
+    restart: yes
+    ports:
+      - "127.0.0.1:8000:8000/tcp"
+
